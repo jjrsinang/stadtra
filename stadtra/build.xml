@@ -102,8 +102,6 @@
 		<echo message="Tomcat  Lib         : ${tomcat.lib}" 	/>
 		<echo message="Java  Home          : ${JAVA_HOME}"	/>	
 		<echo message="Ant     Home        : ${ant.home}"    	/>
-		<echo message="JUnit   Home        : ${junit.home}"  	/>
-		<echo message="Commons Home        : ${commons.home}"	/>
 	</target>
 	
 	<!-- Delete build directories before rebuilding -->
