@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans 	xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:mvc="http://www.springframework.org/schema/mvc"
+		xmlns:oxm="http://www.springframework.org/schema/oxm"
+		
+		xsi:schemaLocation="http://www.springframework.org/schema/beans 
+							http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+							http://www.springframework.org/schema/context 
+							http://www.springframework.org/schema/context/spring-context-4.1.xsd
+							http://www.springframework.org/schema/mvc 
+							http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd
+							http://www.springframework.org/schema/oxm 
+							http://www.springframework.org/schema/oxm/spring-oxm-4.1.xsd">
+	
+ 	<!-- Component scan to find all Spring components -->
+ 	<context:component-scan base-package="com.cmsc128.stadtra"/>
+    
+	<mvc:annotation-driven>
+		<!-- force spring to use jackson 2 -->
+		<mvc:message-converters register-defaults="false">
+			<!-- com.toolkt.pbo.utils.json.MappingJackson2HttpMessageConverter -->
+			<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+				<property name="objectMapper">
+                    <bean class="com.toolkt.utils.hibernate.HibernateAwareObjectMapper" />
+                </property>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+	
+	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="order" value="1" />
+		<property name="mediaTypes">
+			<map>
+				<entry key="json"	value="application/json"/>
+				<entry key="html" 	value="text/html"		/>
+			</map>
+		</property>
+
+		<property name="defaultViews">
+			<list>
+				<!-- JSON View -->
+				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">
+					<!-- Instruct spring not to generate enclosing tag -->
+					<property name="extractValueFromSingleKeyModel" value="true"/>
+				</bean>
+
+				<!-- XML View -->
+				<bean class="org.springframework.web.servlet.view.xml.MarshallingView">
+					<constructor-arg>
+						<bean class="org.springframework.oxm.xstream.XStreamMarshaller">
+							<property name="autodetectAnnotations" value="true"/>
+						</bean>
+					</constructor-arg>
+				</bean>
+			</list>
+		</property>
+	  
+	</bean>
+	
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="order" value="2" />
+	  	<property name="prefix" value="/WEB-INF/uploads/"/>
+	  	<!--  
+	  	<property name="suffix" value=".jsp"/>
+	  	-->
+	</bean>
+	
+	<!-- Configure the multipart resolver -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"> 
+	    <!-- one of the properties available; the maximum file size (30MB) in bytes -->
+	    <property name="maxUploadSize" value="30000000"/>
+	</bean>
+	   
+	<bean id="appInit" class="com.cmsc128.stadtra.controllers.ApplicationInitializer"
+		init-method="init">
+	</bean>  
+</beans>

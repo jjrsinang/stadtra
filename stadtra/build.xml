@@ -1,0 +1,227 @@
+<!-- 
+###############################################################
+## build.xml                                                 ##
+##   - build file for Spring-based apps                      ## 
+## Referenced files:                                         ## 
+## 1. build.properties - contains developer's settings       ##
+## 2. default.properties - contains application defaults     ##
+## 3. runlib.txt - contains list of runtime libraries used   ##
+##    by the application.                                    ##
+##                                                           ##
+###############################################################
+                                                            -->
+<!-- ====================================================== -->
+<!--               TARGET NAME PREFIXES                     -->
+<!--            000-                                        -->
+<!--            100-Initialization tasks                    -->
+<!--            200-                                        -->
+<!--            300-Compilation taks                        -->
+<!--            400-                                        -->
+<!--		    500-Deployment tasks                        -->
+<!--            600-           					            -->
+<!--		    700-Testing tasks (JUnit, Cactus, etc.)     -->
+<!--            800-           					            -->
+<!--            900-Packaging & Distribution tasks          -->
+<!--            999-Tomcat tasks                            -->
+<!-- ====================================================== -->
+
+<project default="100-init" basedir="." name="STADTRA v1.0">
+	
+	<!-- Retrieve environment variables -->
+	<!-- <property environment="env"/>
+	<property name="tomcat.home" value="${tomcat.home}"/> --> 
+	
+	<!-- Override default values below -->
+	<property file="build.properties"/>
+	<!-- set default values -->
+	<property file="default.properties"/>
+
+	<!-- Set compilation classpath -->
+	<path id="compile.classpath">		
+		<!-- Servlet API -->
+		<fileset dir="${tomcat.lib}" 					includes="servlet*.jar"/>
+		
+		<!-- Spring Framework libraries -->
+		<fileset dir="${spring.home}/dist" 				includes="**/org.spring*.jar"/>
+		<fileset dir="${springdata.home}/dist"     		includes="**/spring-data*.jar"/>
+		<fileset dir="${springdata.commons.home}/dist"	includes="**/spring-data*.jar"/>
+
+		<!-- JPA/Hibernate Libraries -->		
+		<fileset dir="${hibernate.home}/lib" 			includes="**/*.jar"/>
+		<fileset dir="${hibernate.validator.home}/dist" includes="**/hibernate-valid*.jar"/>
+
+		<!-- JSON/Jackson Libraries -->		
+		<fileset dir="${jackson.home}/lib" 				includes="**/jackson-all*.jar"/>	
+		<fileset dir="${miscjars.home}"   				includes="**/com.thought*.jar"/>	
+
+		<!-- QueryDSL Libraries -->		
+		<fileset dir="${qrydsl.home}/lib"   			includes="**/*.jar"/>	
+		
+		<!-- requirement for message logging -->		
+		<fileset dir="${commons.home}" 					includes="**/commons-*.jar"/>	
+				
+		<!-- unit testing api -->
+		<fileset dir="${junit.home}"   					includes="**/*.jar"/>	
+		
+		<!-- misc libs -->
+		<fileset dir="${miscjars.home}"   				includes="**/aop*.jar"/>	
+
+	</path>  
+	
+	<!-- Required libraries for JUnit testing not in compile.classpath -->
+	<path id="runtime.classpath">
+		
+		<!-- Required to locate appContext.xml (during JUnit tests) -->
+		<path location="${build.home}"/>	
+		<fileset dir="${junit.home}"   					includes="*.jar"/>
+		
+		<fileset dir="${mysql.home}"   					includes="**/mysql*.jar"/>
+		<fileset dir="${spring.home}"  					includes="**/jta.jar"/>		
+		
+		<!-- Required when app is deployed in server -->
+		<fileset dir="${tomcat.home}"  					includes="**/servlet*.jar"/>		 
+
+		<!-- other libraries -->
+		<fileset dir="${build.home}/WEB-INF/lib"   		includes="*.jar"/>
+		
+	</path>
+
+	<!-- Tomcat Ant library extension -->
+	<path id="tomcat.ant.classpath">
+		<fileset dir="${tomcat.home}"  					includes="**/catalina-ant.jar"/>
+		<fileset dir="${junit.home}"  					includes="**/*.jar"/>
+	</path>	
+
+	<target name="100-init">
+		<tstamp/>
+		<echo message="Application Name    : ${app.name}"    />
+		<echo message="Application Version : ${app.version}" />
+		<echo message="Distribution Home   : ${dist.home}"   />
+		<echo message="QRYDSL Home   	   : ${qrydsl.home}"   />
+		<echo message="Tomcat  Home        : ${tomcat.home}" 	/>
+		<echo message="Tomcat  Lib         : ${tomcat.lib}" 	/>
+		<echo message="Java  Home          : ${JAVA_HOME}"	/>	
+		<echo message="Ant     Home        : ${ant.home}"    	/>
+		<echo message="JUnit   Home        : ${junit.home}"  	/>
+		<echo message="Commons Home        : ${commons.home}"	/>
+	</target>
+	
+	<!-- Delete build directories before rebuilding -->
+	<target name="110-clean" depends="100-init">
+		<echo message="Deleting old ${build.home} directories." />	
+		<!-- delete pbo jar to replace it with a newly generated one -->
+		<echo message="Deleting generated jar."/>
+		<delete file="${tomcat.home}/webapps/${deploy.home}/WEB-INF/lib/pbo-3.0.jar"/>
+		<!--
+		<delete dir="${build.home}" includeemptydirs="true"/>
+		<delete dir="${dist.home}"  includeemptydirs="true"/>
+		-->
+	</target>
+	
+	<!-- Create required directories -->
+	<target name="120-prepare" depends="110-clean">
+		<echo message="Creating build, test, and deploy directories."/>
+
+		<mkdir dir="${build.home}/WEB-INF/classes" 		/>
+		<mkdir dir="${build.home}/WEB-INF/lib"     		/>
+		<mkdir dir="${build.home}/test/classes"    		/>
+		<mkdir dir="${build.home}/test/logs"       		/>
+
+		<echo message="Creating deployment directories."/>
+		
+		<mkdir dir="${tomcat.home}/webapps/${deploy.home}/themes"             />
+		<mkdir dir="${tomcat.home}/webapps/${deploy.home}/WEB-INF/classes"    />
+		<mkdir dir="${tomcat.home}/webapps/${deploy.home}/WEB-INF/lib"        />
+		<mkdir dir="${tomcat.home}/webapps/${deploy.home}/WEB-INF/logs"       />
+	</target>
+
+	<!-- Compile Java src files -->
+	<target name="200-compile" depends="120-prepare" description="Compile src and test files">
+		<echo message="Compiling Java source and test files."/>
+		
+		<!-- ============================================================ -->
+		<!-- APT based code generation                                    -->
+		<!-- ............................................................ -->	      
+		<!-- Note: 														  -->
+		<!-- 1. For the 2nd <javac> task to succeed, the compile destdir  -->
+		<!--	of this build file must match the "Default output folder" -->
+		<!--	of the project as defined in project's Java Build Path    -->
+		<!--	setting. When the two are different, two sets of QXxx     -->
+		<!--	models are generated, one when the IDE saves the source,  -->
+		<!--	and another when this build file is run, triggering an    -->
+		<!--	"Attempt to recreate a file for type QXxx..." error.      -->
+		<!-- ............................................................ -->	      
+		<echo message="$APP.CLASSES = ${app.classes}"/>
+		<!-- Generate QXxx model source 
+		<javac srcdir="${basedir}/src/java" classpathref="compile.classpath">
+			<compilerarg value="-proc:only"/>
+			<compilerarg value="-processor"/>
+			<compilerarg value="com.mysema.query.apt.jpa.JPAAnnotationProcessor"/>
+			<compilerarg value="-s"/>
+			<compilerarg value="${basedir}/src/qrydsl"/>
+		</javac>		
+		-->
+		<!-- Compile app and QXxx sources -->
+		<javac 
+			classpathref="compile.classpath"
+			destdir="${app.classes}">
+
+			<src path="${basedir}/src/java"/>
+			<!-- <src path="${basedir}/src/qrydsl"/> -->
+		</javac>
+		 
+		<echo message="${DSTAMP} ${TSTAMP}"/>
+	</target>
+  
+	<!-- Deploy all app components; requires Tomcat restart-->
+	<target name="300-deploy-all" depends="200-compile, 210-deploy-config">
+		<echo message="Deploying ${app.name} web application."/>
+
+		<!-- Copy compiled Java classes -->
+		<copy  todir="${tomcat.home}/webapps/${deploy.home}/WEB-INF/classes">
+		    <fileset dir="${app.classes}" />
+		</copy>
+
+		<!-- COPY ALL REQUIRED RUNTIME LIBRARIES HERE -->
+		<copy  todir="${tomcat.lib}" flatten="true">
+			<!-- JDBC & Transaction Manager -->
+			<fileset dir="${mysql.home}"  includes="**/mysql*.jar"/>
+			<fileset dir="${spring.home}" includes="**/jta.jar"   />		
+		</copy>		
+
+		<!-- <copy  todir="${tomcat.home}/webapps/${deploy.home}/WEB-INF/lib" flatten="true">			
+			<fileset dir="${software.home}">
+				<includesfile name="runlib.txt"/>
+	        </fileset>
+		</copy> -->
+			
+		<echo message="${DSTAMP} ${TSTAMP}"/>
+	</target>
+	
+	<target name="210-deploy-config">
+		<!-- COPY APPLICATION CONFIGURATION FILES (web.xml) -->
+		<copy  todir="${tomcat.home}/webapps/${deploy.home}/WEB-INF">
+		    <fileset dir="${basedir}/WebContent/WEB-INF">
+		    	<include name="*.xml"/>
+		    	<exclude name="server.xml"/>
+		    	<exclude name="log4j.xml"/>
+		    </fileset>
+		</copy> 
+		<copy  todir="${tomcat.home}/webapps/${deploy.home}/WEB-INF/classes/META-INF" flatten="true">
+		    <fileset dir="${basedir}/src/java/META-INF">
+		    	<include name="**/persistence.xml"/>
+		    </fileset>
+		</copy> 
+		
+		<!-- copy log4j config file -->
+		<copy  todir="${tomcat.home}/webapps/${deploy.home}/WEB-INF/classes">
+			<fileset dir="${basedir}/WebContent/WEB-INF/classes" includes="log4j.xml"/>
+		</copy>
+		 
+		<!-- Copy properties files -->
+		<copy  todir="${tomcat.home}/webapps/${deploy.home}/WEB-INF/classes">
+		    <fileset dir="${basedir}/WebContent/WEB-INF/classes" includes="*.properties" />
+		</copy>		
+	</target>
+	
+</project>

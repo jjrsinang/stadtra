@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		 xmlns="http://java.sun.com/xml/ns/javaee" 
+		 xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+		 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+		 					 http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+  
+	<display-name>Student-Adviser Tracker</display-name>
+	
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+	
+	<context-param>
+	  	<param-name>contextConfigLocation</param-name>
+	  	<param-value>/WEB-INF/context.xml /WEB-INF/servlet.xml</param-value>
+	</context-param>
+	
+	<listener>
+	  	<listener-class>com.cmsc128.stadtra.entities.UserSessionListener</listener-class>
+	</listener>
+	
+	<listener> 
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class> 
+	</listener> 
+	
+	<servlet>
+	  	<servlet-name>stadtra</servlet-name>
+	  	<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+	  	<init-param>
+	    	<param-name>contextConfigLocation</param-name>
+	    	<param-value></param-value>
+	  	</init-param>
+	  	<load-on-startup>1</load-on-startup>
+	</servlet>
+	
+	<servlet-mapping>
+	  	<servlet-name>stadtra</servlet-name>
+	  	<url-pattern>/ws/*</url-pattern>		
+	  	<!-- 
+	  		NOTES: 
+	  		1.	setting url-pattern to: /* 
+	  		    1.1	when browser points to localhost:8080/cims/clients results in: 
+	  		       	a) HTTP Status 404 error on browser
+	  		       	b) No mapping found for HTTP request with URI [/cims/WEB-INF/jsp/clients.jsp in DispatcherServlet with name cims
+	  		       	
+	  			           
+	  		2.	setting url-patter to: /ws/*
+	  			2.1 when browser points to localhost:8080/cims, results in:
+	  				a) index.html displayed on the browser	
+	  			2.2 when browser points to localhost:8080/cims/clients, results in:
+	  				a) HTTP Status 404 /cims/WEB-INF/jsp/clients.jsp 
+	  				   this is the expected output
+	  			2.3	when browser points to localhost:8080/cims/clients.json, results in:  
+	  				a) JSON file listing all clients  
+	  	-->
+	</servlet-mapping>
+	
+	<session-config>
+		<session-timeout>60</session-timeout>
+	</session-config>
+	
+	<!-- Set filter to prevent lazy initialization error (could not initialize proxy - no Session) -->
+	<filter>
+	    <filter-name>OpenSessionInViewFilter</filter-name>
+	    <filter-class>org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter</filter-class>
+	</filter>
+	
+	<filter-mapping>
+	    <filter-name>OpenSessionInViewFilter</filter-name>
+	    <url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+</web-app>
