@@ -180,12 +180,12 @@
 		    <fileset dir="${app.classes}" />
 		</copy>
 
-		<!-- COPY ALL REQUIRED RUNTIME LIBRARIES HERE -->
+		<!-- COPY ALL REQUIRED RUNTIME LIBRARIES HERE
 		<copy  todir="${tomcat.lib}" flatten="true">
-			<!-- JDBC & Transaction Manager -->
+			
 			<fileset dir="${mysql.home}"  includes="**/mysql*.jar"/>
 			<fileset dir="${spring.home}" includes="**/jta.jar"   />		
-		</copy>		
+		</copy> -->
 
 		<!-- <copy  todir="${tomcat.home}/webapps/${deploy.home}/WEB-INF/lib" flatten="true">			
 			<fileset dir="${software.home}">

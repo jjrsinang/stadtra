@@ -9,32 +9,23 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class UserSessionDescription implements Serializable {
 	private static final long serialVersionUID = 7367215979167044299L;
 	
-	private String	userCode;
+	private String	loginId;
 	private String 	userName;
-	private String 	organization;
 	private Date	loginDate;
-	private Integer	durationInMinutes;
+	private Long	durationInMinutes;
 	private String	remoteAddress;
 	
-	public String getUserCode() {
-		return userCode;
+	public String getLoginId() {
+		return loginId;
 	}
-	public void setUserCode(String userCode) {
-		this.userCode = userCode;
+	public void setLoginId(String loginId) {
+		this.loginId = loginId;
 	}
-	
 	public String getUserName() {
 		return userName;
 	}
 	public void setUserName(String userName) {
 		this.userName = userName;
-	}
-
-	public String getOrganization() {
-		return organization;
-	}
-	public void setOrganization(String organization) {
-		this.organization = organization;
 	}
 
 	public Date getLoginDate() {
@@ -44,11 +35,11 @@ public class UserSessionDescription implements Serializable {
 		this.loginDate = loginDate;
 	}
 
-	public void setDurationInMinutes(Integer durationInMinutes) {
+	public void setDurationInMinutes(Long durationInMinutes) {
 		this.durationInMinutes = durationInMinutes;
 	}
 	
-	public Integer getDurationInMinutes() {
+	public Long getDurationInMinutes() {
 		return durationInMinutes;
 	}
 	
