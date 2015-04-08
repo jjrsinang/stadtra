@@ -96,8 +96,8 @@ public class Teacher extends AbstractEntity {
 		this.email = email;
 	}
 
-	@OneToMany(fetch=FetchType.LAZY)
-	@JoinColumn(name = "teacher_id", referencedColumnName = "id", insertable = false, updatable = false)
+	@OneToMany(fetch=FetchType.EAGER)
+	@JoinColumn(name = "id", referencedColumnName = "teacher_id", insertable = false, updatable = false)
 	public Set<TeacherStudent> getStudents() {
 		return students;
 	}

@@ -1,5 +1,7 @@
 package com.cmsc128.stadtra.controllers;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,10 +17,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.cmsc128.stadtra.entities.Filter;
 import com.cmsc128.stadtra.entities.Teacher;
 import com.cmsc128.stadtra.services.TeacherService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.toolkt.utils.CrudError;
 import com.toolkt.utils.ErrorHandler;
+import com.toolkt.utils.StringUtils;
 import com.toolkt.utils.json.JsonData;
 import com.toolkt.utils.model.ApplicationError;
 
@@ -118,7 +124,8 @@ private final Log log = LogFactory.getLog(getClass());
 	public @ResponseBody JsonData list(HttpServletRequest request, 
 			@RequestParam("page") int page, 
 			@RequestParam("start") int start, 
-			@RequestParam("limit") int limit) {
+			@RequestParam("limit") int limit,
+			@RequestParam(value="filter", required=false) String filter) {
 		JsonData data = new JsonData();
 
 		try {
@@ -126,7 +133,26 @@ private final Log log = LogFactory.getLog(getClass());
 //				throw new ApplicationException(CrudError.NOT_AUTHENTICATED);
 //			}
 			
-			Page<Teacher> teachers = service.findAll(new Teacher(), page, start, limit);
+			Teacher teacher = new Teacher();
+				if (StringUtils.hasText(filter)){
+				ObjectMapper mapper = new ObjectMapper();
+				TypeFactory typeFactory = mapper.getTypeFactory();
+				List<Filter> list = mapper.readValue(filter, typeFactory.constructCollectionType(List.class, Filter.class));
+				
+				for (Filter propertyFilter : list) {
+					String property = (String)propertyFilter.getProperty();
+					String value = (String)propertyFilter.getValue();
+					if (StringUtils.hasText(property)) {
+						if (property.equals("lName")) {
+							teacher.setlName(value);
+						} else if (property.equals("employeeNo")) {
+							teacher.setEmployeeNo(value);
+						}
+					}
+				}
+			}
+				
+			Page<Teacher> teachers = service.findAll(teacher, page, start, limit);
 			data.setData(teachers.getContent());
 			data.setRecordCount(teachers.getTotalElements());
 			data.setSuccess(true);

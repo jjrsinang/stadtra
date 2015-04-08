@@ -80,19 +80,19 @@ public class StudentServiceImpl implements StudentService {
 		}
 		
 		if (StringUtils.hasText(student.getStudentNo())) {
-			builder.and(qstudent.studentNo.eq(student.getStudentNo()));
+			builder.and(qstudent.studentNo.contains(student.getStudentNo()));
 		}
 		
 		if (StringUtils.hasText(student.getfName())) {
-			builder.and(qstudent.fName.equalsIgnoreCase(student.getfName()));
+			builder.and(qstudent.fName.contains(student.getfName()));
 		}
 		
 		if (StringUtils.hasText(student.getmName())) {
-			builder.and(qstudent.mName.equalsIgnoreCase(student.getmName()));
+			builder.and(qstudent.mName.contains(student.getmName()));
 		}
 		
 		if (StringUtils.hasText(student.getlName())) {
-			builder.and(qstudent.lName.equalsIgnoreCase(student.getlName()));
+			builder.and(qstudent.lName.contains(student.getlName()));
 		}
 		
 		// sort results by id. similar to "... ORDER BY id DESC"

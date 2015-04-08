@@ -79,19 +79,19 @@ public class TeacherServiceImpl implements TeacherService {
 		}
 		
 		if (StringUtils.hasText(teacher.getEmployeeNo())) {
-			builder.and(qteacher.employeeNo.eq(teacher.getEmployeeNo()));
+			builder.and(qteacher.employeeNo.contains(teacher.getEmployeeNo()));
 		}
 		
 		if (StringUtils.hasText(teacher.getfName())) {
-			builder.and(qteacher.fName.equalsIgnoreCase(teacher.getfName()));
+			builder.and(qteacher.fName.contains(teacher.getfName()));
 		}
 		
 		if (StringUtils.hasText(teacher.getmName())) {
-			builder.and(qteacher.mName.equalsIgnoreCase(teacher.getmName()));
+			builder.and(qteacher.mName.contains(teacher.getmName()));
 		}
 		
 		if (StringUtils.hasText(teacher.getlName())) {
-			builder.and(qteacher.lName.equalsIgnoreCase(teacher.getlName()));
+			builder.and(qteacher.lName.contains(teacher.getlName()));
 		}
 		
 		// sort results by id. similar to "... ORDER BY id DESC"
