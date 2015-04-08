@@ -97,7 +97,7 @@ public class Teacher extends AbstractEntity {
 	}
 
 	@OneToMany(fetch=FetchType.EAGER)
-	@JoinColumn(name = "id", referencedColumnName = "teacher_id", insertable = false, updatable = false)
+	@JoinColumn(name = "teacher_id", referencedColumnName = "id", insertable = false, updatable = false)
 	public Set<TeacherStudent> getStudents() {
 		return students;
 	}
