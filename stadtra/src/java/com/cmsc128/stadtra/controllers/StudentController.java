@@ -1,5 +1,6 @@
 package com.cmsc128.stadtra.controllers;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.cmsc128.stadtra.entities.Filter;
 import com.cmsc128.stadtra.entities.Student;
+import com.cmsc128.stadtra.entities.TeacherStudent_Teacher;
+import com.cmsc128.stadtra.services.LogService;
 import com.cmsc128.stadtra.services.StudentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -35,6 +38,9 @@ public class StudentController extends AbstractController {
 	
 	@Resource
 	private StudentService service;
+	
+	@Resource
+	private LogService logService;
 	
 	@RequestMapping(method=RequestMethod.POST)
 	@ResponseBody
@@ -178,7 +184,7 @@ public class StudentController extends AbstractController {
 //			}
 			
 			Page<Student> students = service.findAll(student, page, start, limit);
-			data.setData(students);
+			data.setData(students.getContent());
 			data.setRecordCount(students.getTotalElements());
 			data.setSuccess(true);
 			
@@ -187,6 +193,46 @@ public class StudentController extends AbstractController {
 		}
 		
 		return data;
+	}
+	
+	@RequestMapping(value="/add_adviser", method=RequestMethod.POST)
+	public @ResponseBody JsonData addAdviser(HttpServletRequest request,
+			@RequestBody TeacherStudent_Teacher teacher) {
+		JsonData data = new JsonData();
+		
+		try {
+			Student student = service.addAdviser(teacher);
+			data.setData(student);
+			data.setRecordCount(1);
+			data.setSuccess(true);
+			
+			com.cmsc128.stadtra.entities.Log activityLog = new com.cmsc128.stadtra.entities.Log();
+			activityLog.setOperation("add adviser");
+			activityLog.setUser(getUserSession(request).getUser().getLoginId());
+			activityLog.setTime(new Date());
+			logService.create(activityLog);
+		} catch (Exception e) {
+			data = controllerError(e);
+		}
+		
+		return data; 
+	}
+	
+	@RequestMapping(value="/list_advisers", method=RequestMethod.GET)
+	public @ResponseBody JsonData listAdvisers(HttpServletRequest request,
+			@RequestParam Long studentId) {
+		JsonData data = new JsonData();
+		
+		try {
+			Page<TeacherStudent_Teacher> advisers = service.getAdvisers(studentId);
+			data.setData(advisers.getContent());
+			data.setRecordCount(advisers.getTotalElements());
+			data.setSuccess(true);
+		} catch (Exception e) {
+			data = controllerError(e);
+		}
+		
+		return data; 
 	}
 	
 	private JsonData controllerError(Exception e) {

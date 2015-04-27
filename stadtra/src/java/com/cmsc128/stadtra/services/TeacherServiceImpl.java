@@ -94,6 +94,10 @@ public class TeacherServiceImpl implements TeacherService {
 			builder.and(qteacher.lName.contains(teacher.getlName()));
 		}
 		
+		if (teacher.getStudentId() != null && teacher.getStudentId() != 0) {
+			builder.and(qteacher.students.any().studentId.eq(teacher.getStudentId()));
+		}
+		
 		// sort results by id. similar to "... ORDER BY id DESC"
 		Sort.Order order = new Sort.Order(Sort.Direction.DESC,  "id");
 		// creates page info that fetches pageSize number of teachers

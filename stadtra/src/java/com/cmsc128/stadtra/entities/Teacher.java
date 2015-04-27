@@ -9,6 +9,9 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -27,8 +30,12 @@ public class Teacher extends AbstractEntity {
 	private Date	birthDate;
 	private String	sex;
 	private String	email;
+	private String	status;
 	
-	private Set<TeacherStudent> students;
+	private Set<TeacherStudent_Student> students;
+	
+	// additional fields for use in searching
+	private Long	studentId;
 	
 	public Teacher(){}
 
@@ -96,13 +103,32 @@ public class Teacher extends AbstractEntity {
 		this.email = email;
 	}
 
+	@Column(name="status")
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
 	@OneToMany(fetch=FetchType.EAGER)
 	@JoinColumn(name = "teacher_id", referencedColumnName = "id", insertable = false, updatable = false)
-	public Set<TeacherStudent> getStudents() {
+	@Where(clause="is_still_effective = 1")
+	public Set<TeacherStudent_Student> getStudents() {
 		return students;
 	}
 
-	public void setStudents(Set<TeacherStudent> students) {
+	public void setStudents(Set<TeacherStudent_Student> students) {
 		this.students = students;
+	}
+
+	@Transient
+	public Long getStudentId() {
+		return studentId;
+	}
+
+	public void setStudentId(Long studentId) {
+		this.studentId = studentId;
 	}
 }

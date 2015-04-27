@@ -125,6 +125,7 @@ private final Log log = LogFactory.getLog(getClass());
 			@RequestParam("page") int page, 
 			@RequestParam("start") int start, 
 			@RequestParam("limit") int limit,
+			@RequestParam(value="employeeNo", required=false) String employeeNo,
 			@RequestParam(value="filter", required=false) String filter) {
 		JsonData data = new JsonData();
 
@@ -134,7 +135,7 @@ private final Log log = LogFactory.getLog(getClass());
 //			}
 			
 			Teacher teacher = new Teacher();
-				if (StringUtils.hasText(filter)){
+			if (StringUtils.hasText(filter)){
 				ObjectMapper mapper = new ObjectMapper();
 				TypeFactory typeFactory = mapper.getTypeFactory();
 				List<Filter> list = mapper.readValue(filter, typeFactory.constructCollectionType(List.class, Filter.class));
@@ -147,9 +148,18 @@ private final Log log = LogFactory.getLog(getClass());
 							teacher.setlName(value);
 						} else if (property.equals("employeeNo")) {
 							teacher.setEmployeeNo(value);
+						} else if (property.equals("studentId")) {
+							teacher.setStudentId((Long)propertyFilter.getValue());
 						}
 					}
 				}
+			}
+			
+			if (StringUtils.hasText(employeeNo)) {
+				System.out.println("*********************");
+				System.out.println(employeeNo);
+				System.out.println("*********************");
+				teacher.setEmployeeNo(employeeNo);
 			}
 				
 			Page<Teacher> teachers = service.findAll(teacher, page, start, limit);
@@ -178,7 +188,7 @@ private final Log log = LogFactory.getLog(getClass());
 //			}
 			
 			Page<Teacher> teachers = service.findAll(teacher, page, start, limit);
-			data.setData(teachers);
+			data.setData(teachers.getContent());
 			data.setRecordCount(teachers.getTotalElements());
 			data.setSuccess(true);
 			

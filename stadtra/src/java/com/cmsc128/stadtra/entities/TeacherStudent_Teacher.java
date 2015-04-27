@@ -4,6 +4,9 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -15,15 +18,19 @@ import com.toolkt.utils.json.DateSerializer;
 @XStreamAlias("teacherStudent")
 @Entity
 @Table(name="t_teacher_student")
-public class TeacherStudent extends AbstractEntity {
+public class TeacherStudent_Teacher extends AbstractEntity {
 	private Long	studentId;
 	private String	studentNo;
+	private String	studentName;
 	private Long	teacherId;
 	private String	employeeNo;
+	private String	teacherName;
 	private Date	dateApproved;
 	private Boolean	isStillEffective;
 	
-	public TeacherStudent(){}
+	private Teacher teacher;
+	
+	public TeacherStudent_Teacher(){}
 
 	@Column(name="student_id")
 	public Long getStudentId() {
@@ -41,6 +48,15 @@ public class TeacherStudent extends AbstractEntity {
 
 	public void setStudentNo(String studentNo) {
 		this.studentNo = studentNo;
+	}
+
+	@Column(name="student_name")
+	public String getStudentName() {
+		return studentName;
+	}
+
+	public void setStudentName(String studentName) {
+		this.studentName = studentName;
 	}
 
 	@Column(name="teacher_id")
@@ -61,6 +77,15 @@ public class TeacherStudent extends AbstractEntity {
 		this.employeeNo = employeeNo;
 	}
 
+	@Column(name="teacher_name")
+	public String getTeacherName() {
+		return teacherName;
+	}
+
+	public void setTeacherName(String teacherName) {
+		this.teacherName = teacherName;
+	}
+
 	@JsonSerialize(using=DateSerializer.class)
 	@Column(name="date_approved")
 	public Date getDateApproved() {
@@ -79,6 +104,14 @@ public class TeacherStudent extends AbstractEntity {
 	public void setIsStillEffective(Boolean isStillEffective) {
 		this.isStillEffective = isStillEffective;
 	}
-	
-	
+
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name = "teacher_id", referencedColumnName = "id", insertable = false, updatable = false)
+	public Teacher getTeacher() {
+		return teacher;
+	}
+
+	public void setTeacher(Teacher teacher) {
+		this.teacher = teacher;
+	}
 }

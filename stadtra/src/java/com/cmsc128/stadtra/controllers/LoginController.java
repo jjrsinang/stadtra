@@ -63,13 +63,10 @@ public class LoginController extends AbstractController {
 			
 			//at this point User successfully logged in.
 			user = users.getContent().get(0);
-
-			if(log.isInfoEnabled()) {
-				log.info("LOCAL PORT: "+request.getLocalPort());
-				log.info("SERVER PORT: "+request.getServerPort());
-				log.info("REMOTE PORT: "+request.getRemotePort());
-				log.info("System configurations loaded");
-			}
+			
+			System.out.println("LOCAL PORT: "+request.getLocalPort());
+			System.out.println("SERVER PORT: "+request.getServerPort());
+			System.out.println("REMOTE PORT: "+request.getRemotePort());
 			
 			//create a UserSession to store user-specific info
 			UserSession userSession = new UserSession();
@@ -80,14 +77,12 @@ public class LoginController extends AbstractController {
 			//retrieve ip address and hostname of user attempting to login
 			userSession.setRemoteAddress(request.getRemoteAddr() + "/" + request.getRemoteHost());
 			//check requester info
-			if(log.isInfoEnabled()) {
-				log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-				log.info("IP Address: " + request.getLocalAddr());
-				log.info("Hostname  : " + request.getLocalName());
-				log.info("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-			}
+			System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+			System.out.println("IP Address: " + request.getLocalAddr());
+			System.out.println("Hostname  : " + request.getLocalName());
+			System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 			
-			data = new JsonData(userSession);
+			data.setData(userSession);
 			data.setRecordCount(1);
 			data.setSuccess(true);
 			
@@ -104,9 +99,8 @@ public class LoginController extends AbstractController {
 			Map<String, UserSession> sessions = getSessions(request.getSession());
 			sessions.put(session.getId(), userSession);
 			
-			if(log.isInfoEnabled()) {
-				log.info("User logged in successfully...");
-			}
+			System.out.println("User logged in successfully...");
+			
 		} catch (Exception e) {
 			data = controllerError(e);
 		}
@@ -115,7 +109,7 @@ public class LoginController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/sessions", method = RequestMethod.GET)
-	public JsonData list(HttpServletRequest request) {
+	public @ResponseBody JsonData list(HttpServletRequest request) {
 		JsonData data = new JsonData();
 
 		try {
@@ -154,9 +148,8 @@ public class LoginController extends AbstractController {
 		
 		try {
 			//invalidate user on logout
-			if(log.isInfoEnabled()) {
-				log.info("Invalidating session[" + request.getSession().getId() + "]");
-			}
+			System.out.println("Invalidating session[" + request.getSession().getId() + "]");
+			
 			request.getSession().invalidate();
 			data.setSuccess(true);
 			
@@ -210,15 +203,6 @@ public class LoginController extends AbstractController {
 //		
 //		return data;
 //	}
-	
-	// this method is called by front-end to simulate ajax request to extend session
-	@RequestMapping(value = "/session/extension", method = RequestMethod.GET)
-	public JsonData extendSession() {
-		JsonData data = new JsonData();
-		data.setSuccess(true);
-		
-		return data;
-	}
 	
 	@RequestMapping(value = "/session/authenticate", method = RequestMethod.GET)
 	public JsonData authenticateJSESSIONID (HttpServletRequest request, @RequestParam("sessionId") String sessionId) {

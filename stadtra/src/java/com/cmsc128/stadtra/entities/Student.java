@@ -1,13 +1,9 @@
 package com.cmsc128.stadtra.entities;
 
 import java.util.Date;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -28,8 +24,6 @@ public class Student extends AbstractEntity {
 	private String	sex;
 	private String	email;
 	private String	classification;
-	
-	private Set<TeacherStudent> advisers;
 	
 	public Student(){}
 
@@ -105,16 +99,4 @@ public class Student extends AbstractEntity {
 	public void setClassification(String classification) {
 		this.classification = classification;
 	}
-
-	@OneToMany(fetch=FetchType.EAGER)
-	@JoinColumn(name = "student_id", referencedColumnName = "id", insertable = false, updatable = false)
-	public Set<TeacherStudent> getAdvisers() {
-		return advisers;
-	}
-
-	public void setAdvisers(Set<TeacherStudent> advisers) {
-		this.advisers = advisers;
-	}
-	
-	
 }
