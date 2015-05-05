@@ -100,10 +100,11 @@ public class StudentServiceImpl implements StudentService {
 			builder.and(qstudent.lName.contains(student.getlName()));
 		}
 		
-		// sort results by id. similar to "... ORDER BY id DESC"
-		Sort.Order order = new Sort.Order(Sort.Direction.DESC,  "id");
+		// sort results by id. similar to "... ORDER BY l_name ASC f_name ASC"
+		Sort.Order order = new Sort.Order(Sort.Direction.ASC,  "lName");
+		Sort.Order order2 = new Sort.Order(Sort.Direction.ASC,  "fName");
 		// creates page info that fetches pageSize number of students
-		Pageable pageReq = new PageRequest(pageStart -1, pageSize, new Sort(order)); //zero-indexed
+		Pageable pageReq = new PageRequest(pageStart -1, pageSize, new Sort(order, order2)); //zero-indexed
 		// creates and executes an SQL statement based on above info
 		Page<Student> students = studentRepository.findAll(builder.getValue(), pageReq);
 		return students;
@@ -135,8 +136,8 @@ public class StudentServiceImpl implements StudentService {
 		builder.and(qteacher.studentId.eq(studentId));
 		
 		
-		// sort results by id. similar to "... ORDER BY id DESC"
-		Sort.Order order = new Sort.Order(Sort.Direction.DESC,  "id");
+		// sort results by id. similar to "... ORDER BY date_approved DESC"
+		Sort.Order order = new Sort.Order(Sort.Direction.DESC,  "dateApproved");
 		// creates page info that fetches pageSize number of students
 		Pageable pageReq = new PageRequest(0, 9999, new Sort(order)); //zero-indexed
 		// creates and executes an SQL statement based on above info

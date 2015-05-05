@@ -98,10 +98,11 @@ public class TeacherServiceImpl implements TeacherService {
 			builder.and(qteacher.students.any().studentId.eq(teacher.getStudentId()));
 		}
 		
-		// sort results by id. similar to "... ORDER BY id DESC"
-		Sort.Order order = new Sort.Order(Sort.Direction.DESC,  "id");
+		// sort results by id. similar to "... ORDER BY l_name ASC f_name ASC"
+		Sort.Order order = new Sort.Order(Sort.Direction.ASC,  "lName");
+		Sort.Order order2 = new Sort.Order(Sort.Direction.ASC,  "fName");
 		// creates page info that fetches pageSize number of teachers
-		Pageable pageReq = new PageRequest(pageStart -1, pageSize, new Sort(order)); //zero-indexed
+		Pageable pageReq = new PageRequest(pageStart -1, pageSize, new Sort(order, order2)); //zero-indexed
 		// creates and executes an SQL statement based on above info
 		Page<Teacher> teachers = teacherRepository.findAll(builder.getValue(), pageReq);
 		return teachers;

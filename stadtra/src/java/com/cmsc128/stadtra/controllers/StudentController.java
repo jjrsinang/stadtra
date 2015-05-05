@@ -19,10 +19,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.cmsc128.stadtra.entities.Filter;
+import com.cmsc128.stadtra.entities.Grade;
 import com.cmsc128.stadtra.entities.Student;
 import com.cmsc128.stadtra.entities.TeacherStudent_Teacher;
+import com.cmsc128.stadtra.services.GradeService;
 import com.cmsc128.stadtra.services.LogService;
 import com.cmsc128.stadtra.services.StudentService;
+import com.cmsc128.stadtra.services.SubjectService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.toolkt.utils.CrudError;
@@ -36,11 +39,18 @@ import com.toolkt.utils.model.ApplicationError;
 public class StudentController extends AbstractController {
 	private final Log log = LogFactory.getLog(getClass());
 	
+
 	@Resource
 	private StudentService service;
 	
 	@Resource
 	private LogService logService;
+	
+	@Resource
+	private SubjectService subjService;
+	
+	@Resource
+	private GradeService gradeService;
 	
 	@RequestMapping(method=RequestMethod.POST)
 	@ResponseBody
@@ -233,6 +243,36 @@ public class StudentController extends AbstractController {
 		}
 		
 		return data; 
+	}
+	
+	@RequestMapping(value="/grades", method=RequestMethod.GET)
+	public @ResponseBody JsonData retrieveGrades(HttpServletRequest request, 
+			@RequestParam("page") int page, 
+			@RequestParam("start") int start, 
+			@RequestParam("limit") int limit,
+			@RequestParam("id") Long id,
+			@RequestParam("status") String status) {
+		JsonData data = new JsonData();
+		
+		try {
+//			if (!isAuthenticated(request)) {
+//				throw new ApplicationException(CrudError.NOT_AUTHENTICATED);
+//			}
+			
+			Grade grade = new Grade();
+			grade.setId(id);
+			grade.setStatus(status);
+			Page<Grade> grades = gradeService.findAll(grade, page, start, limit);
+			
+			data.setData(grades.getContent());
+			data.setRecordCount(grades.getTotalElements());
+			data.setSuccess(true);
+
+		} catch (Exception e) {
+			data = controllerError(e);
+		}
+		
+		return data;
 	}
 	
 	private JsonData controllerError(Exception e) {

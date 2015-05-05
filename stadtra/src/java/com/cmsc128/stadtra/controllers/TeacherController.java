@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.cmsc128.stadtra.entities.Filter;
 import com.cmsc128.stadtra.entities.Teacher;
+import com.cmsc128.stadtra.entities.TeacherSubject;
 import com.cmsc128.stadtra.services.TeacherService;
+import com.cmsc128.stadtra.services.TeacherSubjectService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.toolkt.utils.CrudError;
@@ -35,6 +37,9 @@ private final Log log = LogFactory.getLog(getClass());
 	
 	@Resource
 	private TeacherService service;
+	
+	@Resource
+	private TeacherSubjectService teacherSubjectService;
 	
 	@RequestMapping(method=RequestMethod.POST)
 	@ResponseBody
@@ -192,6 +197,22 @@ private final Log log = LogFactory.getLog(getClass());
 			data.setRecordCount(teachers.getTotalElements());
 			data.setSuccess(true);
 			
+		} catch (Exception e) {
+			data = controllerError(e);
+		}
+		
+		return data;
+	}
+	
+	@RequestMapping(value="/subjects", method=RequestMethod.GET)
+	public @ResponseBody JsonData getSubjects(@RequestParam("id") long id) {
+		JsonData data = new JsonData();
+		
+		try {
+			Page<TeacherSubject> subjects = teacherSubjectService.findAll(id);
+			data.setData(subjects.getContent());
+			data.setRecordCount(subjects.getTotalElements());
+			data.setSuccess(true);
 		} catch (Exception e) {
 			data = controllerError(e);
 		}
