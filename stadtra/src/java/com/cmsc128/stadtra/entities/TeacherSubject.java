@@ -50,7 +50,7 @@ public class TeacherSubject extends AbstractEntity {
 	}
 
 	@OneToMany(fetch=FetchType.EAGER)
-	@JoinColumn(name = "subject_id", referencedColumnName = "id", insertable = false, updatable = false)
+	@JoinColumn(name = "id", referencedColumnName = "subject_id", insertable = false, updatable = false)
 	public List<Subject> getSubject() {
 		return subject;
 	}
