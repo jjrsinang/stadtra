@@ -1,12 +1,10 @@
 package com.cmsc128.stadtra.entities;
 
-import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
@@ -18,7 +16,7 @@ public class TeacherSubject extends AbstractEntity {
 	private	Long teacherId;
 	private Long subjectId;
 	private Boolean isStillEffective;
-	private List<Subject> subject;
+	private Subject subject;
 	
 	public TeacherSubject(){}
 
@@ -49,13 +47,13 @@ public class TeacherSubject extends AbstractEntity {
 		this.isStillEffective = isStillEffective;
 	}
 
-	@OneToMany(fetch=FetchType.EAGER)
+	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name = "id", referencedColumnName = "subject_id", insertable = false, updatable = false)
-	public List<Subject> getSubject() {
+	public Subject getSubject() {
 		return subject;
 	}
 
-	public void setSubject(List<Subject> subject) {
+	public void setSubject(Subject subject) {
 		this.subject = subject;
 	}
 }
