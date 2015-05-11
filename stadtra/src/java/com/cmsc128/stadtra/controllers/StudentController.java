@@ -92,45 +92,7 @@ public class StudentController extends AbstractController {
 		
 		return data;
 	}
-
-	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-	public JsonData update(HttpServletRequest request, @RequestBody Student student, 
-			@PathVariable("id") Integer id) {
-		JsonData data = new JsonData();
-		
-		try { 
-//			if (!isAuthenticated(request)) {
-//				throw new ApplicationException(CrudError.NOT_AUTHENTICATED);
-//			}
-			
-			Student updated = service.update(student);
-			data.setData(updated);
-			data.setRecordCount(1);
-			data.setSuccess(true);
-		} catch (Exception e) {
-			data = controllerError(e);
-		}
-		
-		return data;
-	}
 	
-	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-	public JsonData delete(HttpServletRequest request, @PathVariable("id") Long id) {
-		JsonData data = new JsonData();
-		
-		try {
-//			if (!isAuthenticated(request)) {
-//				throw new ApplicationException(CrudError.NOT_AUTHENTICATED);
-//			}
-			
-			service.delete(id);
-			data.setSuccess(true);
-		} catch (Exception e) {
-			data = controllerError(e);
-		}
-		
-		return data;
-	}
 	
 	//Note:
 	//To test this method manually, point the browser to: 

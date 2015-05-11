@@ -58,49 +58,6 @@ private final Log log = LogFactory.getLog(getClass());
 			data = controllerError(e);		
 		}
 		return data;
-	}	
-	
-	@RequestMapping(value="/{id}", method=RequestMethod.GET)
-	public JsonData retrieve(HttpServletRequest request, @PathVariable("id") Long id) {
-		JsonData data = new JsonData();
-		
-		try {
-//			if (!isAuthenticated(request)) {
-//				throw new ApplicationException(CrudError.NOT_AUTHENTICATED);
-//			}
-			
-			Teacher teacher = service.findById(id);
-			
-			data.setData(teacher);
-			data.setRecordCount(1);
-			data.setSuccess(true);
-
-		} catch (Exception e) {
-			data = controllerError(e);
-		}
-		
-		return data;
-	}
-
-	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-	public JsonData update(HttpServletRequest request, @RequestBody Teacher teacher, 
-			@PathVariable("id") Integer id) {
-		JsonData data = new JsonData();
-		
-		try { 
-//			if (!isAuthenticated(request)) {
-//				throw new ApplicationException(CrudError.NOT_AUTHENTICATED);
-//			}
-			
-			Teacher updated = service.update(teacher);
-			data.setData(updated);
-			data.setRecordCount(1);
-			data.setSuccess(true);
-		} catch (Exception e) {
-			data = controllerError(e);
-		}
-		
-		return data;
 	}
 	
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
@@ -179,9 +136,10 @@ private final Log log = LogFactory.getLog(getClass());
 		return data;
 	}	
 
-	@RequestMapping(value="/query/results", method=RequestMethod.POST)
+	@RequestMapping(value="/query/results", method=RequestMethod.GET)
 	public @ResponseBody JsonData search(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody Teacher teacher, 
+			@RequestParam(value="lName", required=false) String lName,
+			@RequestParam(value="employeeNo", required=false) String employeeNo,
 			@RequestParam("page") int page,  
 			@RequestParam("start") int start, 
 			@RequestParam("limit") int limit) {
@@ -191,6 +149,10 @@ private final Log log = LogFactory.getLog(getClass());
 //			if (!isAuthenticated(request)) {
 //				throw new ApplicationException(CrudError.NOT_AUTHENTICATED);
 //			}
+			
+			Teacher teacher = new Teacher();
+			teacher.setEmployeeNo(employeeNo);
+			teacher.setlName(lName);
 			
 			Page<Teacher> teachers = service.findAll(teacher, page, start, limit);
 			data.setData(teachers.getContent());

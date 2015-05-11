@@ -113,7 +113,16 @@ public class StudentServiceImpl implements StudentService {
 	@Transactional
 	@Override
 	public Student addAdviser(TeacherStudent_Teacher student_teacher) {
+		
+		// set others to to effective
+		Page<TeacherStudent_Teacher> teachers = getAdvisers(student_teacher.getStudentId());
+		for (TeacherStudent_Teacher teacherStudent_Teacher : teachers) {
+			teacherStudent_Teacher.setIsStillEffective(false);
+			teacher_studentRepository.save(teacherStudent_Teacher);
+		}
+		
 		teacher_studentRepository.save(student_teacher);
+		
 		return studentRepository.findOne(student_teacher.getStudentId());
 	}
 	

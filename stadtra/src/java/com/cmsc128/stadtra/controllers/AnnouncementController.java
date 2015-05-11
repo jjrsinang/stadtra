@@ -100,6 +100,20 @@ public class AnnouncementController extends AbstractController {
         return null;
     }
 	
+	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+	public @ResponseBody JsonData delete(HttpServletRequest request, @PathVariable("id") Long id) {
+		JsonData data = new JsonData();
+		
+		try {
+			service.delete(id);
+			data.setSuccess(true);
+		} catch (Exception e) {
+			data = controllerError(e);
+		}
+		
+		return data;
+	}
+	
 	@RequestMapping(method = RequestMethod.GET)
 	public @ResponseBody JsonData list(HttpServletRequest request, 
 			@RequestParam("page") int page, 
