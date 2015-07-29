@@ -44,6 +44,19 @@ public class RequestServiceImpl implements RequestService {
 		requestRepository.delete(request);
 		return null;
 	}
+	
+	@Transactional(rollbackFor=ApplicationException.class)
+	@Override
+	public Request update(Request updated) throws ApplicationException {
+		Request request = requestRepository.findOne(updated.getId());
+		if (request == null) {
+			throw new ApplicationException("Request does not exist.");
+		}
+		request.setAccepted(updated.getAccepted());
+		request.setMessage(updated.getMessage());
+		
+		return requestRepository.save(request);
+	}
 
 	@Override
 	public Page<Request> findAll(Request request, int pageStart, int offset, int pageSize) {
@@ -64,10 +77,12 @@ public class RequestServiceImpl implements RequestService {
 		
 		if (request.getStudentId() != null && request.getStudentId() > 0) {
 			builder.and(qrequest.studentId.eq(request.getStudentId()));
+			builder.and(qrequest.accepted.isNotNull());
 		}
 		
 		if (request.getTeacherId() != null && request.getTeacherId() > 0) {
 			builder.and(qrequest.teacherId.eq(request.getTeacherId()));
+			builder.and(qrequest.accepted.isNull());
 		}
 		
 		// sort results by id. similar to "... ORDER BY id DESC"

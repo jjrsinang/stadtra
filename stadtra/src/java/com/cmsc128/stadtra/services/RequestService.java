@@ -9,6 +9,7 @@ public interface RequestService {
 	Request	create(Request request);
 	Request	findById(Long id);
 	Request	delete(Long id) throws ApplicationException;
+	Request update(Request updated) throws ApplicationException;
 	
 	Page<Request>	findAll(Request request, int pageStart, int offset, int pageSize);
 }

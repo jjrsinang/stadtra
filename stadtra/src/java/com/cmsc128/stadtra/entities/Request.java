@@ -2,6 +2,9 @@ package com.cmsc128.stadtra.entities;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
@@ -15,6 +18,9 @@ public class Request extends AbstractEntity {
 	private Boolean accepted;
 	private String reason;
 	private String message;
+	
+	private Student student;
+	private Teacher teacher;
 	
 	public Request(){}
 
@@ -61,5 +67,25 @@ public class Request extends AbstractEntity {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name = "student_id", referencedColumnName = "id", insertable = false, updatable = false)
+	public Student getStudent() {
+		return student;
+	}
+
+	public void setStudent(Student student) {
+		this.student = student;
+	}
+
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name = "teacher_id", referencedColumnName = "id", insertable = false, updatable = false)
+	public Teacher getTeacher() {
+		return teacher;
+	}
+
+	public void setTeacher(Teacher teacher) {
+		this.teacher = teacher;
 	}
 }

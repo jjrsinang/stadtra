@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
+import java.util.Date;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import com.cmsc128.stadtra.entities.Announcement;
 import com.cmsc128.stadtra.services.AnnouncementService;
+import com.cmsc128.stadtra.services.LogService;
 import com.toolkt.utils.CrudError;
 import com.toolkt.utils.ErrorHandler;
 import com.toolkt.utils.StringUtils;
@@ -41,8 +43,12 @@ public class AnnouncementController extends AbstractController {
 	@Resource
 	private FileUploadService uploadService;
 	
+	@Resource
+	private LogService logService;
+	
 	@RequestMapping(method = RequestMethod.POST)
 	public @ResponseBody JsonData upload(@RequestParam(value = "data", required = false) CommonsMultipartFile fileUpload,
+			HttpServletRequest request,
 			@RequestParam("title") String title,
 			@RequestParam("body") String body) {
 		JsonData data = new JsonData();
@@ -65,6 +71,12 @@ public class AnnouncementController extends AbstractController {
 			data.setRecordCount(1);
 			data.setSuccess(true);
 			
+			
+			com.cmsc128.stadtra.entities.Log activityLog = new com.cmsc128.stadtra.entities.Log();
+			activityLog.setOperation("add announcement");
+			activityLog.setUser(getUserSession(request).getUser().getLoginId());
+			activityLog.setTime(new Date());
+			logService.create(activityLog);
 		} catch (Exception e) {
 			data = controllerError(e);
 		}
@@ -107,6 +119,12 @@ public class AnnouncementController extends AbstractController {
 		try {
 			service.delete(id);
 			data.setSuccess(true);
+			
+			com.cmsc128.stadtra.entities.Log activityLog = new com.cmsc128.stadtra.entities.Log();
+			activityLog.setOperation("delete announcement");
+			activityLog.setUser(getUserSession(request).getUser().getLoginId());
+			activityLog.setTime(new Date());
+			logService.create(activityLog);
 		} catch (Exception e) {
 			data = controllerError(e);
 		}

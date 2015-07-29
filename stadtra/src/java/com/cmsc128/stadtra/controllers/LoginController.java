@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.cmsc128.stadtra.entities.User;
 import com.cmsc128.stadtra.entities.UserSession;
 import com.cmsc128.stadtra.entities.UserSessionDescription;
+import com.cmsc128.stadtra.services.LogService;
 import com.cmsc128.stadtra.services.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.toolkt.utils.CrudError;
@@ -39,6 +40,9 @@ public class LoginController extends AbstractController {
 	
 	@Resource
 	private UserService service;
+	
+	@Resource
+	private LogService logService;
 	
 	public LoginController() {
 		// TODO Auto-generated constructor stub
@@ -237,6 +241,47 @@ public class LoginController extends AbstractController {
 		}
 		
 		return data;
+	}
+	
+	@RequestMapping(value="/logs", method=RequestMethod.GET)
+	public @ResponseBody JsonData listAdvisers(HttpServletRequest request,
+			@RequestParam("page") int page, 
+			@RequestParam("start") int start, 
+			@RequestParam("limit") int limit) {
+		JsonData data = new JsonData();
+		
+		try {
+			Page<com.cmsc128.stadtra.entities.Log> logs = logService.list(page, start, limit);
+			data.setData(logs.getContent());
+			data.setRecordCount(logs.getTotalElements());
+			data.setSuccess(true);
+		} catch (Exception e) {
+			data = controllerError(e);
+		}
+		
+		return data; 
+	}
+	
+	@RequestMapping(value="/users", method=RequestMethod.GET)
+	public @ResponseBody JsonData searchUsers(HttpServletRequest request,
+			@RequestParam(value="lName", required=false) String lName,
+			@RequestParam("page") int page, 
+			@RequestParam("start") int start, 
+			@RequestParam("limit") int limit) {
+		JsonData data = new JsonData();
+		
+		try {
+			User user = new User();
+			user.setlName(lName);
+			Page<User> users = service.findAllLike(user, start, page, limit);
+			data.setData(users.getContent());
+			data.setRecordCount(users.getTotalElements());
+			data.setSuccess(true);
+		} catch (Exception e) {
+			data = controllerError(e);
+		}
+		
+		return data; 
 	}
 	
 	private JsonData controllerError(Exception e) {

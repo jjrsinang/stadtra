@@ -112,4 +112,57 @@ public class UserServiceImpl implements UserService {
 		return users;
 	}
 
+	@Override
+	public Page<User> findAllLike(User user, int pageStart, int offset, int pageSize) {
+		if(pageStart == 0) pageStart = 1;
+		if(pageSize  == 0) pageSize = 20;
+		
+		/*
+		 * Q classes are query classes - they are objects that contain "columns"
+		 *  to be used when generating SQL select statements
+		 */
+		QUser quser = QUser.user;
+		
+		/*
+		 * boolean builders are java conditional statements
+		 * that are used for SQL WHERE clauses 
+		 */
+		BooleanBuilder builder = new BooleanBuilder();
+		
+		if (user.getId() != null && user.getId() > 0) {
+			builder.and(quser.id.eq(user.getId())); // translates to "... AND t_user.id = id"
+		}
+		
+		if (StringUtils.hasText(user.getLoginId())) {
+			builder.and(quser.loginId.eq(user.getLoginId()));
+		}
+		
+		if (StringUtils.hasText(user.getPassword())) {
+			builder.and(quser.password.eq(user.getPassword()));
+		}
+		
+		if (StringUtils.hasText(user.getfName())) {
+			builder.and(quser.fName.eq(user.getfName()));
+		}
+		
+		if (StringUtils.hasText(user.getmName())) {
+			builder.and(quser.mName.eq(user.getmName()));
+		}
+		
+		if (StringUtils.hasText(user.getlName())) {
+			builder.and(quser.lName.contains(user.getlName()));
+		}
+		
+		if (StringUtils.hasText(user.getRole())) {
+			builder.and(quser.role.eq(user.getRole()));
+		}
+		
+		// sort results by id. similar to "... ORDER BY id DESC"
+		Sort.Order order = new Sort.Order(Sort.Direction.DESC,  "id");
+		// creates page info that fetches pageSize number of users
+		Pageable pageReq = new PageRequest(pageStart -1, pageSize, new Sort(order)); //zero-indexed
+		// creates and executes an SQL statement based on above info
+		Page<User> users = userRepository.findAll(builder.getValue(), pageReq);
+		return users;
+	}
 }

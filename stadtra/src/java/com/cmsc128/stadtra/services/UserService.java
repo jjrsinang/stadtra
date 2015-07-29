@@ -12,4 +12,5 @@ public interface UserService {
 	User	delete(Long id) throws ApplicationException;
 	
 	Page<User>	findAll(User user, int pageStart, int offset, int pageSize);
+	Page<User>	findAllLike(User user, int pageStart, int offset, int pageSize);
 }

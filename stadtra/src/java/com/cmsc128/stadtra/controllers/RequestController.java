@@ -1,11 +1,15 @@
 package com.cmsc128.stadtra.controllers;
 
+import java.util.Date;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,8 +18,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.cmsc128.stadtra.entities.Notification;
 import com.cmsc128.stadtra.entities.Request;
+import com.cmsc128.stadtra.services.LogService;
 import com.cmsc128.stadtra.services.RequestService;
+import com.cmsc128.stadtra.services.StudentService;
 import com.toolkt.utils.CrudError;
 import com.toolkt.utils.ErrorHandler;
 import com.toolkt.utils.json.JsonData;
@@ -28,10 +35,17 @@ public class RequestController extends AbstractController {
 	
 	@Resource
 	private RequestService service;
+	
+	@Resource
+	private StudentService studentService;
+	
+	@Resource
+	private LogService logService;
 
 	@RequestMapping(method=RequestMethod.POST)
+	@SendTo("/notify")
 	@ResponseBody
-	public JsonData create(@RequestBody Request request) {
+	public JsonData create(HttpServletRequest servletRequest, @RequestBody Request request) {
 		JsonData data = new JsonData();
 		
 		try {
@@ -42,6 +56,12 @@ public class RequestController extends AbstractController {
 			data.setData(created);
 			data.setRecordCount(1);
 			data.setSuccess(true);
+			
+			com.cmsc128.stadtra.entities.Log activityLog = new com.cmsc128.stadtra.entities.Log();
+			activityLog.setOperation("add request");
+			activityLog.setUser(getUserSession(servletRequest).getUser().getLoginId());
+			activityLog.setTime(new Date());
+			logService.create(activityLog);
 		} catch(Exception e) {
 			data = controllerError(e);		
 		}
@@ -49,7 +69,7 @@ public class RequestController extends AbstractController {
 	}
 	
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-	public JsonData delete(HttpServletRequest request, @PathVariable("id") Long id) {
+	public @ResponseBody JsonData delete(HttpServletRequest request, @PathVariable("id") Long id) {
 		JsonData data = new JsonData();
 		
 		try {
@@ -59,6 +79,40 @@ public class RequestController extends AbstractController {
 			
 			service.delete(id);
 			data.setSuccess(true);
+			
+			com.cmsc128.stadtra.entities.Log activityLog = new com.cmsc128.stadtra.entities.Log();
+			activityLog.setOperation("delete request");
+			activityLog.setUser(getUserSession(request).getUser().getLoginId());
+			activityLog.setTime(new Date());
+			logService.create(activityLog);
+		} catch (Exception e) {
+			data = controllerError(e);
+		}
+		
+		return data;
+	}
+	
+	@RequestMapping(value = "/list/{id}", method = RequestMethod.PUT)
+	public @ResponseBody JsonData update(HttpServletRequest servletRequest, 
+			@RequestBody Request request, @PathVariable("id") Long id) {
+		JsonData data = new JsonData();
+		
+		try {
+//			if (!isAuthenticated(request)) {
+//				throw new ApplicationException(CrudError.NOT_AUTHENTICATED);
+//			}
+			
+			Request updated = service.update(request);
+			data.setData(updated);
+			data.setRecordCount(1);
+			data.setSuccess(true);
+			
+			com.cmsc128.stadtra.entities.Log activityLog = new com.cmsc128.stadtra.entities.Log();
+			activityLog.setOperation("update request");
+			activityLog.setUser(getUserSession(servletRequest).getUser().getLoginId());
+			activityLog.setTime(new Date());
+			logService.create(activityLog);
+			
 		} catch (Exception e) {
 			data = controllerError(e);
 		}
@@ -80,6 +134,13 @@ public class RequestController extends AbstractController {
 //				throw new ApplicationException(CrudError.NOT_AUTHENTICATED);
 //			}
 			
+			if ((studentId == null || studentId == 0) && (teacherId == null || teacherId == 0)) {
+				data.setData(null);
+				data.setRecordCount(0);
+				data.setSuccess(true);
+				return data;
+			}
+			
 			Request request = new Request();
 			request.setStudentId(studentId);
 			request.setTeacherId(teacherId);
@@ -95,6 +156,20 @@ public class RequestController extends AbstractController {
 		
 		return data;
 	}
+	
+	@RequestMapping(value="/notify", method=RequestMethod.GET)
+	@MessageMapping("/notify")
+    public @ResponseBody JsonData greeting() throws Exception {
+        JsonData data = new JsonData();
+        data.setSuccess(true);
+        Notification notification = new Notification();
+        notification.setTitle("Hello");
+        
+        data.setData(notification);
+        return data;
+    }
+	
+	
 	
 	private JsonData controllerError(Exception e) {
 		JsonData data = new JsonData();
